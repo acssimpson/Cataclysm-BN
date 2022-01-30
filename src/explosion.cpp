@@ -130,6 +130,14 @@ static std::map<const Creature *, int> do_blast( const tripoint &p, const float 
     const float tile_dist = 1.0f;
     const float diag_dist = trigdist ? M_SQRT2 * tile_dist : 1.0f * tile_dist;
     const float zlev_dist = 4.0f; // Penalty for going up/down
+    int area_covered = 0;
+    int layers = static_cast<int>(g->m.has_zlevels() ? (static_cast<float>(radius) + 1) / zlev_dist : 0);
+    add_msg(_("Exploding layers %1s"), layers);
+    for (int v = 0; v <= layers; v++) {
+        int layer_coverage = pow(radius - zlev_dist * v, 2) * M_PI;
+        area_covered += v == 0 ? 1 : 2 * layer_coverage;
+        add_msg(_("Layer %2s Coverage Amount: %1s"), layer_coverage, v);
+    }
     // 7 3 5
     // 1 . 2
     // 6 4 8
@@ -140,15 +148,14 @@ static std::map<const Creature *, int> do_blast( const tripoint &p, const float 
     const size_t max_index = g->m.has_zlevels() ? 10 : 8;
 
     std::map<const Creature *, int> blasted;
-
     g->m.bash( p, fire ? power : ( 2 * power ), true, false, false );
-
     std::priority_queue< std::pair<float, tripoint>, std::vector< std::pair<float, tripoint> >, pair_greater_cmp_first >
     open;
     std::set<tripoint> closed;
     std::map<tripoint, float> dist_map;
     open.push( std::make_pair( 0.0f, p ) );
     dist_map[p] = 0.0f;
+    int limit = 1;
     // Find all points to blast
     while( !open.empty() ) {
         const float distance = open.top().first;
@@ -159,18 +166,23 @@ static std::map<const Creature *, int> do_blast( const tripoint &p, const float 
             continue;
         }
 
-        closed.insert( pt );
+        closed.insert(pt);
 
-        const float force = power * blast_percentage( radius, distance );
-        if( force <= 1.0f ) {
-            continue;
-        }
+        //if () {
+        //    if (!g->m.impassable(pt)) g->m.ter_set(pt, t_pavement_y);
+        //    continue;
+        //}
+
+        const float force = power * blast_percentage(area_covered, limit);
+
+        //if( force <= 1.0f ) {//|| distance>=limit
+        //    continue;
+        //}
 
         if( g->m.impassable( pt ) && pt != p ) {
             // Don't propagate further
             continue;
         }
-
         // Iterate over all neighbors. Bash all of them, propagate to some
         for( size_t i = 0; i < max_index; i++ ) {
             tripoint dest( pt + tripoint( x_offset[i], y_offset[i], z_offset[i] ) );
@@ -178,17 +190,17 @@ static std::map<const Creature *, int> do_blast( const tripoint &p, const float 
                 continue;
             }
 
-            const float bashing_force = force / 4;
-            if( z_offset[i] == 0 ) {
+            const float bashing_force = force;
+            if( z_offset[i] == 0 ) {//&& !g->m.impassable(dest)
                 // Horizontal - no floor bashing
-                g->m.bash( dest, bashing_force, true, false, false );
+                g->m.bash(dest, bashing_force, true, false, false);
             } else if( z_offset[i] > 0 ) {
                 // Should actually bash through the floor first, but that's not really possible yet
-                g->m.bash( dest, bashing_force, true, false, true );
+                //g->m.bash( dest, bashing_force, true, false, true );
             } else if( !g->m.valid_move( pt, dest, false, true ) ) {
                 // Only bash through floor if it doesn't exist
                 // Bash the current tile's floor, not the one's below
-                g->m.bash( pt, bashing_force, true, false, true );
+                //g->m.bash( pt, bashing_force, true, false, true );
             }
 
             float next_dist = distance;
@@ -197,16 +209,23 @@ static std::map<const Creature *, int> do_blast( const tripoint &p, const float 
                 if( !g->m.valid_move( pt, dest, false, true ) ) {
                     continue;
                 }
-
                 next_dist += zlev_dist;
             }
 
-            if( dist_map.count( dest ) == 0 || dist_map[dest] > next_dist ) {
-                open.push( std::make_pair( next_dist, dest ) );
-                dist_map[dest] = next_dist;
+            if(dist_map.count( dest ) == 0 || dist_map[dest] > next_dist) {
+                if (dist_map.count(dest) == 0 && !g->m.impassable(dest))
+                {
+                    g->m.ter_set(pt, t_pavement);
+                    limit++;
+                }
+                if (limit < area_covered) {
+                    open.push(std::make_pair(next_dist, dest));
+                    dist_map[dest] = next_dist;
+                }
             }
         }
     }
+    add_msg(_("Total Tiles Exploded: %1s Closed: %2s"), limit, closed.size() );
 
     // Draw the explosion
     std::map<tripoint, nc_color> explosion_colors;
