@@ -1100,7 +1100,8 @@ int pick_lock_actor::use( player &p, item &it, bool, const tripoint & ) const
         }
         const ter_id ter = g->m.ter( pnt );
         const furn_id furn = g->m.furn( pnt );
-        lockpicking_open_result result = get_lockpicking_open_result( ter, furn );
+        lockpicking_open_result result = get_lockpicking_open_result
+        ( ter, furn );
         const bool is_allowed = result.new_ter_type || result.new_furn_type;
         return is_allowed;
     };

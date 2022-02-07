@@ -207,6 +207,7 @@ static const itype_id itype_log( "log" );
 static const itype_id itype_mind_scan_robofac( "mind_scan_robofac" );
 static const itype_id itype_muscle( "muscle" );
 static const itype_id itype_nail( "nail" );
+static const itype_id itype_nails_mouse_picklock("nails_mouse_pickock");
 static const itype_id itype_pipe( "pipe" );
 static const itype_id itype_rope_30( "rope_30" );
 static const itype_id itype_rope_makeshift_30( "rope_makeshift_30" );
@@ -251,6 +252,7 @@ static const trait_id trait_DEBUG_HS( "DEBUG_HS" );
 static const trait_id trait_NOPAIN( "NOPAIN" );
 static const trait_id trait_SPIRITUAL( "SPIRITUAL" );
 static const trait_id trait_STOCKY_TROGLO( "STOCKY_TROGLO" );
+static const trait_id trait_NAILS_MOUSE("NAILS_MOUSE");
 
 static const std::string flag_AUTODOC( "AUTODOC" );
 static const std::string flag_AUTODOC_COUCH( "AUTODOC_COUCH" );
@@ -2496,7 +2498,7 @@ void activity_handlers::lockpicking_finish( player_activity *act, player *p )
 {
     item_location &loc = act->targets[ 0 ];
     item *it = loc.get_item();
-    if( it == nullptr ) {
+    if( it == nullptr && !p->has_trait(trait_NAILS_MOUSE)) {
         debugmsg( "lockpick item location lost" );
         return;
     }

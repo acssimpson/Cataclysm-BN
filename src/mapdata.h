@@ -137,6 +137,26 @@ struct pry_result {
     };
     bool load( const JsonObject &jsobj, const std::string &member, map_object_type obj_type );
 };
+struct pick_result {
+    // Difficulty value used for roll
+    int difficulty;
+    // Does an unsuccessful pick attempt potentially sound an alarm?
+    bool alarm;
+    // What terrain or furniture it will turn into when opened
+    ter_str_id new_ter_type;
+    furn_str_id new_furn_type;
+    // Messages for succeeding or failing pick attempt, and breakage
+    std::string success_message;
+    std::string fail_message;
+    
+    bool can_do;
+    pick_result();
+    enum map_object_type {
+        furniture = 0,
+        terrain
+    };
+    bool load( const JsonObject &jsobj, const std::string &member, map_object_type obj_type );
+};
 
 /*
  * List of known flags, used in both terrain.json and furniture.json.
@@ -277,6 +297,7 @@ struct map_data_common_t {
         map_bash_info        bash;
         map_deconstruct_info deconstruct;
         pry_result           pry;
+        pick_result          pick;
 
     public:
         virtual ~map_data_common_t() = default;

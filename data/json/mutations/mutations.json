@@ -2266,9 +2266,26 @@
     "cut_dmg_bonus": 3,
     "description": "Your fingernails are long and sharp.  If you aren't wearing gloves, your unarmed attacks deal a minor amount of cutting damage.",
     "types": [ "CLAWS" ],
-    "changes_to": [ "CLAWS", "TALONS" ],
+    "changes_to": [ "CLAWS", "TALONS", "NAILS_MOUSE"],
     "cancels": [ "ARM_TENTACLES", "ARM_TENTACLES_4", "ARM_TENTACLES_8" ],
     "category": [ "RAPTOR" ]
+  },
+  {
+    "type": "mutation",
+    "id": "NAILS_MOUSE",
+    "name": { "str": "Mouse Nails" },
+    "points": 2,
+    "visibility": 3,
+    "ugliness": 2,
+    "fine_cutting_quality": 4,
+    "lockpick_quality": 5,
+    "description": "Your nails have elongated, and while their delicacy makes them hard to use in combat, you find that they're the perfect substitude for a lockpick or a scalpel.",
+    "types": [ "CLAWS" ],
+    "prereqs": [ "NAILS" ],
+    "prereqs2": [ "SMALL_OK" ],
+    "threshreq": [ "THRESH_MOUSE" ],
+    "cancels": [ "ARM_TENTACLES", "ARM_TENTACLES_4", "ARM_TENTACLES_8" ],
+    "category": [ "MOUSE" ]
   },
   {
     "type": "mutation",
@@ -3594,7 +3611,7 @@
     "ugliness": 1,
     "description": "You have a set of prominent rodent-like whiskers around your mouth.  These make you more aware of vibrations in the air, and improve your ability to dodge slightly, but only when uncovered.",
     "types": [ "WHISKERS" ],
-    "prereqs": [ "MUZZLE_RAT", "MUZZLE_MOUSE" ],
+    "prereqs": [ "WHISKERS" ],
     "category": [ "RAT", "MOUSE" ]
   },
   {
@@ -4028,11 +4045,25 @@
     "valid": false,
     "purifiable": false,
     "prereqs": [ "SMALL_OK" ],
+    "prereqs2": [ "MOUSE_EARS" ],
     "threshreq": [ "THRESH_MOUSE" ],
     "category": [ "MOUSE" ],
     "stealth_modifier": 40,
     "speed_modifier": 1.15,
     "movecost_modifier": 0.75
+  },
+  {
+    "type": "mutation",
+    "id": "MOUSTER_KEY",
+    "name": { "str": "Mouster Key" },
+    "points": 1,
+    "description": "Your nails, your ears, your stature- all tools that you leverage as you make short work of the windows, locks, and dials that stand between you are your loot.",
+    "valid": false,
+    "purifiable": false,
+    "prereqs": [ "CRAFTY" ],
+    "prereqs2": [ "NAILS_MOUSE" ],
+    "threshreq": [ "THRESH_MOUSE" ],
+    "category": [ "MOUSE" ]
   },
   {
     "type": "mutation",
@@ -4259,7 +4290,7 @@
     "visibility": 4,
     "ugliness": 3,
     "description": "Your face and jaw have begun… changing.  Masks and such fit OK, but you're noticeably mutated.",
-    "changes_to": [ "BEAK", "BEAK_HUM", "BEAK_PECK", "PROBOSCIS", "MINOTAUR", "MUZZLE", "MUZZLE_BEAR", "MUZZLE_LONG", "MUZZLE_RAT", "MUZZLE_MOUSE" ],
+    "changes_to": [ "BEAK", "BEAK_HUM", "BEAK_PECK", "PROBOSCIS", "MINOTAUR", "MUZZLE", "MUZZLE_BEAR", "MUZZLE_LONG", "MUZZLE_RAT" ],
     "category": [ "FELINE" ]
   },
   {
@@ -4334,18 +4365,6 @@
     "prereqs": [ "SNOUT" ],
     "category": [ "RAT" ],
     "restricts_gear": [ "mouth" ]
-  },
-  {
-    "type": "mutation",
-    "id": "MUZZLE_MOUSE",
-    "name": { "str": "Tiny Muzzle" },
-    "points": 0,
-    "visibility": 3,
-    "ugliness": 1,
-    "description": "Your pronounced jaw has shaped itself into a cute, pointed nose.",
-    "types": [ "MUZZLE" ],
-    "prereqs": [ "SNOUT" ],
-    "category": [ "MOUSE" ]
   },
   {
     "type": "mutation",
@@ -5850,7 +5869,7 @@
       "attack_text_u": "You tear into %s with your teeth",
       "attack_text_npc": "%1$s tears into %2$s with their teeth",
       "body_part": "mouth",
-      "blocker_mutations": [ "MUZZLE", "MUZZLE_LONG", "MUZZLE_RAT", "MUZZLE_MOUSE" ],
+      "blocker_mutations": [ "MUZZLE", "MUZZLE_LONG", "MUZZLE_RAT" ],
       "chance": 20,
       "base_damage": { "damage_type": "stab", "amount": 25 }
     },

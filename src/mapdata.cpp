@@ -333,6 +333,8 @@ pry_result::pry_result() : pry_quality( -1 ), pry_bonus_mult( 1 ),
     break_ter_type( ter_str_id::NULL_ID() ), break_furn_type( furn_str_id::NULL_ID() ),
     pry_items( item_group_id( "EMPTY_GROUP" ) ), break_items( item_group_id( "EMPTY_GROUP" ) ) {}
 
+
+
 bool pry_result::load( const JsonObject &jsobj, const std::string &member,
                        map_object_type obj_type )
 {
@@ -381,6 +383,38 @@ bool pry_result::load( const JsonObject &jsobj, const std::string &member,
     j.read( "success_message", success_message );
     j.read( "fail_message", fail_message );
     j.read( "break_message", break_message );
+
+    return true;
+}
+
+pick_result::pick_result() : difficulty(1),
+    alarm(false),
+    new_ter_type(ter_str_id::NULL_ID()),
+    new_furn_type(furn_str_id::NULL_ID()) {}
+
+bool pick_result::load( const JsonObject &jsobj, const std::string &member,
+                       map_object_type obj_type )
+{
+    if( !jsobj.has_object( member ) ) {
+        return false;
+    }
+
+    JsonObject j = jsobj.get_object( member );
+    difficulty = j.get_int( "difficulty", 1 );
+    alarm = j.get_bool( "alarm", false );
+
+    can_do = true;
+    switch( obj_type ) {
+        case pry_result::furniture:
+            new_furn_type = furn_str_id( j.get_string( "new_furn_type", "f_null" ) );
+            break;
+        case pry_result::terrain:
+            new_ter_type = ter_str_id( j.get_string( "new_ter_type", "t_null" ) );
+            break;
+    }
+
+    j.read( "success_message", success_message );
+    j.read( "fail_message", fail_message );
 
     return true;
 }
@@ -1299,6 +1333,7 @@ void ter_t::load( const JsonObject &jo, const std::string &src )
     bash.load( jo, "bash", map_bash_info::terrain );
     deconstruct.load( jo, "deconstruct", false );
     pry.load( jo, "pry", pry_result::terrain );
+    pick.load( jo, "pick", pick_result::terrain );
 }
 
 static void check_bash_items( const map_bash_info &mbi, const std::string &id, bool is_terrain )

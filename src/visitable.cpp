@@ -39,6 +39,8 @@ static const itype_id itype_UPS( "UPS" );
 static const itype_id itype_UPS_off( "UPS_off" );
 
 static const quality_id qual_BUTCHER( "BUTCHER" );
+static const quality_id qual_CUT_FINE("CUT_FINE");
+static const quality_id qual_LOCKPICK("LOCKPICK");
 
 static const bionic_id bio_tools( "bio_tools" );
 static const bionic_id bio_ups( "bio_ups" );
@@ -278,6 +280,18 @@ int visitable<Character>::max_quality( const quality_id &qual ) const
     if( qual == qual_BUTCHER ) {
         for( const trait_id &mut : self->get_mutations() ) {
             res = std::max( res, mut->butchering_quality );
+        }
+    }
+
+    if( qual == qual_CUT_FINE ) {
+        for( const trait_id &mut : self->get_mutations() ) {
+            res = std::max( res, mut->fine_cutting_quality );
+        }
+    }
+
+    if( qual == qual_LOCKPICK ) {
+        for( const trait_id &mut : self->get_mutations() ) {
+            res = std::max( res, mut->lockpicking_quality );
         }
     }
 

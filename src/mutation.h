@@ -165,6 +165,8 @@ struct mutation_branch {
         cata::optional<int> scent_mask;
 
         int butchering_quality = 0;
+        int fine_cutting_quality = 0;
+        int lockpicking_quality = 0;
 
         cata::value_ptr<mut_transform> transform;
 

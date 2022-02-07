@@ -109,5 +109,22 @@
     "charges_per_use": 1,
     "qualities": [ [ "LOCKPICK", 40 ] ],
     "use_action": { "type": "picklock", "pick_quality": 40 }
+  },
+  {
+    "id": "nails_mouse_pickock",
+    "type": "TOOL",
+    "category": "tools",
+    "name": { "str": "mouse nails" },
+    "description": "this a pseudo item",
+    "volume": "0 ml",
+    "price": 0,
+    "price_postapoc": 0,
+    "symbol": ";",
+    "color": "light_gray",
+    "initial_charges": 1,
+    "max_charges": 1,
+    "charges_per_use": 1,
+    "qualities": [ [ "LOCKPICK", 5 ] ],
+    "use_action": { "type": "picklock", "pick_quality": 5 }
   }
 ]

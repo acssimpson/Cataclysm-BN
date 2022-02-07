@@ -1468,6 +1468,12 @@
         { "item": "splinter", "count": [ 1, 2 ] },
         { "item": "nail", "charges": [ 0, 2 ] }
       ]
+    },
+    "pick": {
+      "success_message": "You pry open the door.",
+      "fail_message": "You pry, but cannot pry open the door.",
+      "difficulty": 8,
+      "new_ter_type": "t_door_o"
     }
   },
   {

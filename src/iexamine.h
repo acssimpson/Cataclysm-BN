@@ -55,6 +55,8 @@ void harvest_ter( player &p, const tripoint &examp );
 void harvested_plant( player &p, const tripoint &examp );
 void locked_object( player &p, const tripoint &examp );
 void locked_object_pickable( player &p, const tripoint &examp );
+bool attempt_pry(player& p, const tripoint& examp);
+bool attempt_pick(player& p, const tripoint& examp);
 void bulletin_board( player &p, const tripoint &examp );
 void fault( player &p, const tripoint &examp );
 void notify( player &p, const tripoint &pos );

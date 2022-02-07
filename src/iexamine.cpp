@@ -143,6 +143,7 @@ static const itype_id itype_marloss_berry( "marloss_berry" );
 static const itype_id itype_marloss_seed( "marloss_seed" );
 static const itype_id itype_mycus_fruit( "mycus_fruit" );
 static const itype_id itype_nail( "nail" );
+static const itype_id itype_nails_mouse_picklock("nails_mouse_pickock");
 static const itype_id itype_petrified_eye( "petrified_eye" );
 static const itype_id itype_sheet( "sheet" );
 static const itype_id itype_stick( "stick" );
@@ -174,6 +175,7 @@ static const trait_id trait_BURROW( "BURROW" );
 static const trait_id trait_DEBUG_HS( "DEBUG_HS" );
 static const trait_id trait_ILLITERATE( "ILLITERATE" );
 static const trait_id trait_INSECT_ARMS_OK( "INSECT_ARMS_OK" );
+static const trait_id trait_NAILS_MOUSE( "NAILS_MOUSE" );
 static const trait_id trait_M_DEFENDER( "M_DEFENDER" );
 static const trait_id trait_M_DEPENDENT( "M_DEPENDENT" );
 static const trait_id trait_M_FERTILE( "M_FERTILE" );
@@ -1415,30 +1417,30 @@ void iexamine::gunsafe_el( player &p, const tripoint &examp )
  */
 void iexamine::locked_object( player &p, const tripoint &examp )
 {
-    auto prying_items = p.crafting_inventory().items_with( []( const item & it ) -> bool {
-        item temporary_item( it.type );
-        return temporary_item.has_quality( quality_id( "PRY" ), 1 );
-    } );
 
-    if( prying_items.empty() ) {
-        add_msg( m_info, _( "The %s is locked.  If only you had something to pry it with…" ),
-                 g->m.has_furn( examp ) ? g->m.furnname( examp ) : g->m.tername( examp ) );
+    if (p.movement_mode_is(CMM_CROUCH)) {
+        if (g->m.furn(examp).obj().pick.can_do) {
+            if (attempt_pick(p, examp)) return;
+        }
+        if (g->m.furn(examp).obj().pry.difficulty != -1) {
+            if (attempt_pry(p, examp)) return;
+        }
+        add_msg(m_info, _("The %s is locked.  If only you had something to pick its lock with…"),
+            g->m.has_furn(examp) ? g->m.furnname(examp) : g->m.tername(examp));
         return;
     }
+    else {
 
-    // Sort by their quality level.
-    std::sort( prying_items.begin(), prying_items.end(), []( const item * a, const item * b ) -> bool {
-        return a->get_quality( quality_id( "PRY" ) ) > b->get_quality( quality_id( "PRY" ) );
-    } );
-
-    //~ %1$s: terrain/furniture name, %2$s: prying tool name
-    p.add_msg_if_player( _( "You attempt to pry open the %1$s using your %2$s…" ),
-                         g->m.has_furn( examp ) ? g->m.furnname( examp ) : g->m.tername( examp ), prying_items[0]->tname() );
-
-    // if crowbar() ever eats charges or otherwise alters the passed item, rewrite this to reflect
-    // changes to the original item.
-    item temporary_item( prying_items[0]->type );
-    iuse::crowbar( &p, &temporary_item, false, examp );
+        if (g->m.furn(examp).obj().pry.difficulty != -1) {
+            if(attempt_pry(p, examp)) return;
+        }
+        if (g->m.furn(examp).obj().pick.can_do ) {
+            if(attempt_pick(p, examp)) return;
+        }
+        add_msg(m_info, _("The %s is locked.  If only you had something to pry it with…"),
+            g->m.has_furn(examp) ? g->m.furnname(examp) : g->m.tername(examp));
+        return;
+    }
 }
 
 /**
@@ -1446,44 +1448,88 @@ void iexamine::locked_object( player &p, const tripoint &examp )
 */
 void iexamine::locked_object_pickable( player &p, const tripoint &examp )
 {
-    std::vector<item *> picklocks = p.items_with( [&p]( const item & it ) {
-        // Don't search for worn items such as hairpins
-        if( p.get_item_position( &it ) >= -1 ) {
-            return it.type->get_use( "picklock" ) != nullptr;
-        }
-        return false;
-    } );
-
-    if( picklocks.empty() ) {
-        add_msg( m_info, _( "The %s is locked.  If only you had something to pick its lock with…" ),
-                 g->m.has_furn( examp ) ? g->m.furnname( examp ) : g->m.tername( examp ) );
-        return;
-    }
-
-    // Sort by their picklock level.
-    std::sort( picklocks.begin(), picklocks.end(), [&]( const item * a, const item * b ) {
-        const auto actor_a = dynamic_cast<const pick_lock_actor *>
-                             ( a->type->get_use( "picklock" )->get_actor_ptr() );
-        const auto actor_b = dynamic_cast<const pick_lock_actor *>
-                             ( b->type->get_use( "picklock" )->get_actor_ptr() );
-        return actor_a->pick_quality > actor_b->pick_quality;
-    } );
-
-    for( item *it : picklocks ) {
-        const auto actor = dynamic_cast<const pick_lock_actor *>
-                           ( it->type->get_use( "picklock" )->get_actor_ptr() );
-        p.add_msg_if_player( _( "You attempt to pick lock of %1$s using your %2$s…" ),
-                             g->m.has_furn( examp ) ? g->m.furnname( examp ) : g->m.tername( examp ), it->tname() );
-        const ret_val<bool> can_use = actor->can_use( p, *it, false, examp );
-        if( can_use.success() ) {
-            actor->use( p, *it, false, examp );
-            return;
-        } else {
-            p.add_msg_if_player( m_bad, can_use.str() );
-        }
-    }
+    //forwarding this to the updated function. Remove once we know it won't break anything.
+    locked_object(p, examp);
 }
 
+bool iexamine :: attempt_pry(player& p, const tripoint& examp) {
+    auto prying_items = p.crafting_inventory().items_with([](const item& it) -> bool {
+        item temporary_item(it.type);
+        return temporary_item.has_quality(quality_id("PRY"), 1);
+        });
+
+    if (prying_items.empty()) {
+        return false;
+    }
+
+    // Sort by their quality level.
+    std::sort(prying_items.begin(), prying_items.end(), [](const item* a, const item* b) -> bool {
+        return a->get_quality(quality_id("PRY")) > b->get_quality(quality_id("PRY"));
+        });
+
+    //~ %1$s: terrain/furniture name, %2$s: prying tool name
+    p.add_msg_if_player(_("You attempt to pry open the %1$s using your %2$s…"),
+        g->m.has_furn(examp) ? g->m.furnname(examp) : g->m.tername(examp), prying_items[0]->tname());
+
+    // if crowbar() ever eats charges or otherwise alters the passed item, rewrite this to reflect
+    // changes to the original item.
+    item temporary_item(prying_items[0]->type);
+    iuse::crowbar(&p, &temporary_item, false, examp);
+    return true;
+}
+bool iexamine :: attempt_pick(player& p, const tripoint& examp) {
+    std::vector<item*> picklocks = p.items_with([&p](const item& it) {
+        // Don't search for worn items such as hairpins
+        if (p.get_item_position(&it) >= -1) {
+            return it.type->get_use("picklock") != nullptr;
+        }
+        return false;
+        });
+
+    const pick_lock_actor* actor_to_use = nullptr;
+    item* item_to_use = nullptr;
+    if (!picklocks.empty()) {
+        // Sort by their picklock level.
+        std::sort(picklocks.begin(), picklocks.end(), [&](const item* a, const item* b) {
+            const auto actor_a = dynamic_cast<const pick_lock_actor*>
+                (a->type->get_use("picklock")->get_actor_ptr());
+            const auto actor_b = dynamic_cast<const pick_lock_actor*>
+                (b->type->get_use("picklock")->get_actor_ptr());
+            return actor_a->pick_quality > actor_b->pick_quality;
+            });
+
+
+        for (item* it : picklocks) {
+            actor_to_use = dynamic_cast<const pick_lock_actor*>
+                (it->type->get_use("picklock")->get_actor_ptr());
+            item_to_use = it;
+        }
+    }
+
+    item mouseClaws(itype_nails_mouse_picklock);
+    if(p.has_trait(trait_NAILS_MOUSE)){
+        const pick_lock_actor* mouseActor = dynamic_cast<const pick_lock_actor*>(itype_nails_mouse_picklock -> get_use("picklock")->get_actor_ptr());
+        if (actor_to_use == nullptr || mouseActor->pick_quality > actor_to_use->pick_quality) {
+            actor_to_use = mouseActor;
+             item_to_use = &mouseClaws;
+        }
+    }
+    if (actor_to_use == nullptr) {
+        return false;
+    }
+    p.add_msg_if_player(_("You attempt to pick lock of %1$s using your %2$s…"),
+        g->m.has_furn(examp) ? g->m.furnname(examp) : g->m.tername(examp), item_to_use->tname());
+
+    const ret_val<bool> can_use = actor_to_use->can_use(p, *item_to_use, false, examp);
+    if (can_use.success()) {
+        actor_to_use->use(p, *item_to_use, false, examp);
+        return true;
+    }
+    else {
+        p.add_msg_if_player(m_bad, can_use.str());
+    }
+    return true;
+}
 void iexamine::bulletin_board( player &p, const tripoint &examp )
 {
     g->validate_camps();
