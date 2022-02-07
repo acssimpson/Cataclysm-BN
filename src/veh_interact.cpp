@@ -460,7 +460,7 @@ void veh_interact::do_main_loop()
             if( veh->handle_potential_theft( dynamic_cast<player &>( g->u ) ) ) {
                 finish = do_unload();
             }
-        } else if ( action == "CHANGE_SHAPE" ) {
+        } else if( action == "CHANGE_SHAPE" ) {
             // purely cosmetic
             do_change_shape();
         } else if( action == "ASSIGN_CREW" ) {
@@ -1968,7 +1968,8 @@ bool veh_interact::do_unload()
     return true;
 }
 
-void veh_interact::do_change_shape() {
+void veh_interact::do_change_shape()
+{
     if( cant_do( 'p' ) == task_reason::INVALID_TARGET ) {
         msg = _( "No valid vehicle parts here." );
         return;
@@ -2030,7 +2031,7 @@ void veh_interact::do_change_shape() {
 
             // get default selection after sorting
             for( std::size_t i = 0; i < smenu.entries.size(); ++i ) {
-                if( smenu.entries[i].extratxt.sym == sel_vpart_info->sym) {
+                if( smenu.entries[i].extratxt.sym == sel_vpart_info->sym ) {
                     default_selection = i;
                     break;
                 }
@@ -2038,8 +2039,9 @@ void veh_interact::do_change_shape() {
 
             smenu.selected = default_selection;
             smenu.query();
-            const vpart_info* selected_shape = shapes[smenu.ret];
-            // Now what? I've the part selected, the shape selected?
+            const vpart_info *selected_shape = shapes[smenu.ret];
+            part.proxy_part_id = selected_shape->get_id();
+            part.proxy_sym = selected_shape->sym;
         } else {
             move_in_list( part_selected, action, parts_here.size() );
         }
