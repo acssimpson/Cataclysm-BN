@@ -1692,7 +1692,7 @@
     "changes_to": [ "HOLLOW_BONES" ],
     "movecost_modifier": 0.9,
     "attackcost_modifier": 0.9,
-    "weight_capacity_modifier": 0.8
+    "weight_capacity_modifier": 0.85
   },
   {
     "type": "mutation",
@@ -3594,7 +3594,7 @@
     "ugliness": 1,
     "description": "You have a set of prominent rodent-like whiskers around your mouth.  These make you more aware of vibrations in the air, and improve your ability to dodge slightly, but only when uncovered.",
     "types": [ "WHISKERS" ],
-    "prereqs": [ "MUZZLE_RAT" ],
+    "prereqs": [ "MUZZLE_RAT", "MUZZLE_MOUSE" ],
     "category": [ "RAT", "MOUSE" ]
   },
   {
@@ -3979,7 +3979,8 @@
     "category": [ "MOUSE" ],
     "hp_modifier": -0.05,
     "dodge_modifier": 1,
-    "weight_capacity_modifier": 0.8
+    "passive_mods": { "str_mod": -1 },
+    "weight_capacity_modifier": 0.85
   },
   {
     "type": "mutation",
@@ -3995,7 +3996,8 @@
     "category": [ "MOUSE" ],
     "hp_modifier": -0.3,
     "dodge_modifier": 2,
-    "weight_capacity_modifier": 0.5,
+    "weight_capacity_modifier": 0.65,
+    "passive_mods": { "str_mod": -2 },
     "noise_modifier": 0.0
   },
   {
@@ -4013,7 +4015,8 @@
     "category": [ "MOUSE" ],
     "hp_modifier": -0.25,
     "dodge_modifier": 2,
-    "weight_capacity_modifier": 0.7,
+    "weight_capacity_modifier": 0.8,
+    "passive_mods": { "str_mod": -2 },
     "noise_modifier": 0.0
   },
   {
@@ -4256,7 +4259,7 @@
     "visibility": 4,
     "ugliness": 3,
     "description": "Your face and jaw have begun… changing.  Masks and such fit OK, but you're noticeably mutated.",
-    "changes_to": [ "BEAK", "BEAK_HUM", "BEAK_PECK", "PROBOSCIS", "MINOTAUR", "MUZZLE", "MUZZLE_BEAR", "MUZZLE_LONG", "MUZZLE_RAT" ],
+    "changes_to": [ "BEAK", "BEAK_HUM", "BEAK_PECK", "PROBOSCIS", "MINOTAUR", "MUZZLE", "MUZZLE_BEAR", "MUZZLE_LONG", "MUZZLE_RAT", "MUZZLE_MOUSE" ],
     "category": [ "FELINE" ]
   },
   {
@@ -4331,6 +4334,18 @@
     "prereqs": [ "SNOUT" ],
     "category": [ "RAT" ],
     "restricts_gear": [ "mouth" ]
+  },
+  {
+    "type": "mutation",
+    "id": "MUZZLE_MOUSE",
+    "name": { "str": "Tiny Muzzle" },
+    "points": 0,
+    "visibility": 3,
+    "ugliness": 1,
+    "description": "Your pronounced jaw has shaped itself into a cute, pointed nose.",
+    "types": [ "MUZZLE" ],
+    "prereqs": [ "SNOUT" ],
+    "category": [ "MOUSE" ]
   },
   {
     "type": "mutation",
@@ -5835,7 +5850,7 @@
       "attack_text_u": "You tear into %s with your teeth",
       "attack_text_npc": "%1$s tears into %2$s with their teeth",
       "body_part": "mouth",
-      "blocker_mutations": [ "MUZZLE", "MUZZLE_LONG", "MUZZLE_RAT" ],
+      "blocker_mutations": [ "MUZZLE", "MUZZLE_LONG", "MUZZLE_RAT", "MUZZLE_MOUSE" ],
       "chance": 20,
       "base_damage": { "damage_type": "stab", "amount": 25 }
     },
